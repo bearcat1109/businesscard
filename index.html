@@ -3,21 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persona 3 Reload - Actual Menu Replica</title>
+    <title>Persona 3 Reload Menu</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* These colors are sampled directly from menu screenshot */
             --p3r-light-blue: #00d2ff;
-            --p3r-medium-blue: #008aff;
             --p3r-dark-blue: #0000a0;
-            --p3r-text-light: #ffffff;
-            --p3r-wallet-white: #fefefe;
-            --p3r-wallet-grey: #e0e0e0;
-            --p3r-button-grey: #666;
-            --p3r-font: 'Montserrat', sans-serif; /* Montserrat Black for the heavy titles */
-            --menu-rotation: -15deg;
             --shard-color: #ff007f;
+            --p3r-font: 'Montserrat', sans-serif;
         }
 
         body, html {
@@ -25,242 +18,143 @@
             padding: 0;
             height: 100%;
             overflow: hidden;
-            background: linear-gradient(135deg, var(--p3r-light-blue) 0%, var(--p3r-medium-blue) 40%, var(--p3r-dark-blue) 100%);
+            background-color: #000; /* Stays black until video loads */
             font-family: Arial, sans-serif;
-            color: white;
         }
 
-        /* Central Menu Stack */
+        /* VIDEO CONTAINER CONFIG */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1; /* Bring to front for testing, we will move it back once it works */
+            background-color: #000520; 
+            overflow: hidden;
+        }
+
+        .video-bg {
+            position: absolute;
+            width: 110vw; 
+            height: 110vh;
+            top: 50%;
+            left: 50%;
+            object-fit: cover;
+            /* This keeps Makoto's face in frame */
+            object-position: center bottom; 
+            transform: translate(-50%, -50%); 
+            transition: opacity 1s ease-in-out;
+            pointer-events: none;
+        }
+
+        #menu-intro { z-index: 5; }
+        #menu-loop { z-index: 4; }
+        .hidden { opacity: 0; pointer-events: none; }
+
+        /* UI ELEMENTS */
         .menu-wrapper {
             position: absolute;
             top: 50%;
-            left: 55%;
+            left: 60%;
             transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            z-index: 20;
+            z-index: 10;
         }
 
         .menu-item {
             position: relative;
             font-family: var(--p3r-font);
-            font-size: 2.8rem;
+            font-size: 3rem;
             text-transform: uppercase;
             font-weight: 900;
-            line-height: 0.9;
-            margin: -5px 0;
-            color: var(--p3r-text-light);
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
-            
-            /* slant */
-            transform: skew(-25deg);
-            
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            
-            user-select: none;
-            cursor: pointer;
-            z-index: 21;
-
-            /*  Entrance Animation (Starts invisible) */
-            opacity: 0;
-            animation: menuSlideIn 0.5s ease-out forwards;
-        }
-
-        /* The active "ITEM" state, matching the screenshot */
-        .menu-item.active {
-            font-size: 3.5rem;
             color: white;
-            position: relative;
-            transform: skew(-25deg) scale(1.1);
+            font-style: italic;
+            margin: 8px 0;
+            transform: skew(-25deg);
+            cursor: pointer;
+            transition: transform 0.2s ease-out;
+            opacity: 0;
+            animation: slideIn 0.5s ease-out forwards;
         }
 
-        /* Replicating the "ITEM" special mask/overlay (the animated text glow from previous template) */
-        .menu-item.active::before {
-            content: 'ITEM';
-            position: absolute;
-            top: 0; left: 0;
-            color: black;
-            opacity: 1;
-            z-index: 22;
-            transform: translate(3px, 3px);
-            background: linear-gradient(90deg, #ff007f, #00ffff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .menu-item:hover {
+            transform: skew(-25deg) translateX(30px) scale(1.1);
         }
 
-        /* The Glass Shard (Mask) Logic */
-
-        /* The shard pseudo-element is initially invisible */
+        /* Shard Effect */
         .menu-item::after {
             content: '';
             position: absolute;
             top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: var(--shard-color); /* This is the background that will *color* the text when blended */
-            
-            /* Define the shard shape using clip-path (A complex sharp polygon) */
-            clip-path: polygon(0% 0%, 10% 40%, 40% 0%, 100% 50%, 60% 100%, 10% 90%, 30% 60%, 0% 100%);
-            
+            width: 120%; height: 100%;
+            background: var(--shard-color);
+            clip-path: polygon(0% 0%, 15% 45%, 45% 0%, 100% 50%, 70% 100%, 0% 100%);
+            mix-blend-mode: screen;
             opacity: 0;
-            visibility: hidden;
-            
-            mix-blend-mode: screen; 
-            
-            /* Stack the shard *on top* of the text */
-            z-index: 23;
-            transform: translate(-5px, -5px) rotate(5deg) scale(1.2); /* Position and rotate slightly */
-            transition: all 0.15s ease-out; /* Fast, sharp appearance */
+            transition: 0.15s;
         }
 
-        /* Hover interaction: Make the text jump and the shard appear */
-        .menu-item:hover {
-            color: white; /* Force the text to white so the blend mode works */
-            transform: skew(-25deg) translateX(25px) scale(1.05); /* Text moves and grows slightly on hover */
+        .menu-item:hover::after { opacity: 1; }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: skew(-25deg) translateX(0); }
         }
 
-        /* Active/Hover: Display the shard, repositioned slightly */
-        .menu-item:hover::after,
-        .menu-item.active::after {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(0px, 0px) rotate(0deg) scale(1); /* Sharp alignment */
-        }
-
-        /* ENTRANCE ANIMATION LOGIC */
-        @keyframes menuSlideIn {
-            from { 
-                opacity: 0; 
-                transform: skew(-25deg) translateX(100px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: skew(-25deg) translateX(0); 
-            }
-        }
-
-        /* Staggering the entrance (Adjust delays as needed) */
-        .menu-item:nth-child(1) { animation-delay: 0.2s; }
-        .menu-item:nth-child(2) { animation-delay: 0.3s; }
-        .menu-item:nth-child(3) { animation-delay: 0.4s; }
-        .menu-item:nth-child(4) { animation-delay: 0.5s; }
-        .menu-item:nth-child(5) { animation-delay: 0.6s; }
-        .menu-item:nth-child(6) { animation-delay: 0.7s; }
-        .menu-item:nth-child(7) { animation-delay: 0.8s; }
-        .menu-item:nth-child(8) { animation-delay: 0.9s; }
-
-
-        /* 3. The Wallet UI element */
         .wallet-ui {
             position: absolute;
-            top: 10%;
-            left: 8%;
+            top: 50px; left: 50px;
             background: white;
             color: black;
-            padding: 10px 20px;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            z-index: 30;
-            transform: skew(-10deg);
+            padding: 10px 30px;
+            transform: skew(-15deg);
+            z-index: 10;
         }
-
-        .wallet-value {
-            font-size: 1.5rem;
-            letter-spacing: 1px;
-        }
-
-        .wallet-label {
-            font-size: 0.7rem;
-            color: #666;
-            margin-top: 3px;
-        }
-
-        /* 4. The Button Guide (Bottom Right) */
-        .button-guide {
-            position: absolute;
-            bottom: 30px;
-            right: 40px;
-            text-align: right;
-            z-index: 30;
-            font-size: 0.9rem;
-        }
-
-        .cmd-label { font-weight: bold; display: block; margin-bottom: 5px; }
-
-        .btn-prompt {
-            background: #666; /* Base color for buttons like in image_0 */
-            color: white;
-            font-weight: bold;
-            padding: 3px 8px;
-            border-radius: 50%;
-            margin-left: 5px;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            width: 20px;
-            height: 20px;
-            text-transform: uppercase;
-        }
-
-        /* 5. Classroom/Background Silhouettes */
-        .background-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            /* Placeholder: replace with your image asset */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%2300d2ff"/><circle cx="50" cy="50" r="30" fill="%23008aff"/><text x="10" y="80" font-family="Arial" font-size="20" fill="%230000a0">CLASSROOM</text></svg>'); 
-            background-size: cover;
-            filter: blur(5px) saturate(0.5);
-            opacity: 0.4;
-        }
-
     </style>
 </head>
 <body>
+
     <div class="video-container">
-        <video id="menu-loop" class="video-bg" muted autoplay loop>
+        <video id="menu-loop" class="video-bg" muted autoplay loop playsinline>
             <source src="main.mp4" type="video/mp4">
         </video>
 
-        <video id="menu-intro" class="video-bg" muted autoplay>
+        <video id="menu-intro" class="video-bg" muted autoplay playsinline>
             <source src="splash.mp4" type="video/mp4">
         </video>
     </div>
 
-    <div class="menu-wrapper">
-        <div class="menu-item">Skill</div>
-        <div class="menu-item">Equip</div>
-        <div class="menu-item">Persona</div>
-        <div class="menu-item">Stats</div>
-        <div class="menu-item">Quest</div>
-        <div class="menu-item">Social Link</div>
-        <div class="menu-item">Calendar</div>
-        <div class="menu-item">System</div>
+    <div class="wallet-ui">
+        <div style="font-size: 2rem;">¥ Gabriel Berres</div>
+        <div style="font-size: 0.8rem; color: #555;">Programmer Analyst</div>
     </div>
 
-    <div class="wallet-ui">
-        <span class="wallet-value">&yen;47,407</span>
-        <span class="wallet-label">current wallet</span>
+    <div class="menu-wrapper">
+        <div class="menu-item" style="animation-delay: 0.1s;">About Me</div>
+        <div class="menu-item" style="animation-delay: 0.2s;">Work Experience</div>
+        <a href="https://github.com/bearcat1109" target="_blank" style="text-decoration: none;">
+            <div class="menu-item" style="animation-delay: 0.1s;">Github Link</div>
+        </a>
+        <div class="menu-item" style="animation-delay: 0.4s;">Contact Info</div>
+        <!-- <div class="menu-item" style="animation-delay: 0.5s;">Quest</div>
+        <div class="menu-item" style="animation-delay: 0.6s;">Social Link</div> -->
     </div>
 
     <script>
         const intro = document.getElementById('menu-intro');
-        const loop = document.getElementById('menu-loop');
-
-        // When the 6-second splash ends
-        intro.onended = function() {
-            // Fade out the intro video
+        
+        // Final fallback: If the video DOES load, this will fire.
+        intro.onplay = () => console.log("Splash is playing!");
+        
+        intro.onended = () => {
             intro.classList.add('hidden');
-            
-            // Cleanup: Remove the intro from the screen after the 1s fade finishes
-            setTimeout(() => {
-                intro.style.display = 'none';
-            }, 1000); 
+            console.log("Intro ended, switching to loop.");
         };
+
+        // Troubleshooting: Log if the files are even found
+        intro.onerror = () => console.error("Could not find splash.mp4");
+        document.getElementById('menu-loop').onerror = () => console.error("Could not find main.mp4");
     </script>
 </body>
 </html>
