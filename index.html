@@ -14,34 +14,27 @@
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000; /* Stays black until video loads */
+            margin: 0; padding: 0;
+            height: 100%; overflow: hidden;
+            background-color: #000;
             font-family: Arial, sans-serif;
         }
 
-        /* VIDEO CONTAINER CONFIG */
+        /* VIDEO BACKGROUND */
         .video-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1; /* Bring to front for testing, we will move it back once it works */
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
             background-color: #000520; 
             overflow: hidden;
         }
 
         .video-bg {
             position: absolute;
-            width: 110vw; 
-            height: 110vh;
-            top: 50%;
-            left: 50%;
+            width: 110vw; height: 110vh;
+            top: 50%; left: 50%;
             object-fit: cover;
-            /* This keeps Makoto's face in frame */
             object-position: center bottom; 
             transform: translate(-50%, -50%); 
             transition: opacity 1s ease-in-out;
@@ -55,8 +48,7 @@
         /* UI ELEMENTS */
         .menu-wrapper {
             position: absolute;
-            top: 50%;
-            left: 60%;
+            top: 50%; left: 60%;
             transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
@@ -65,38 +57,82 @@
 
         .menu-item {
             position: relative;
+            display: grid; /* MAGIC ALIGNMENT: Stacks children perfectly */
+            place-items: center start;
             font-family: var(--p3r-font);
-            font-size: 3rem;
+            font-size: 3.5rem;
             text-transform: uppercase;
             font-weight: 900;
-            color: white;
             font-style: italic;
-            margin: 8px 0;
+            margin: 12px 0;
             transform: skew(-25deg);
             cursor: pointer;
-            transition: transform 0.2s ease-out;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             opacity: 0;
             animation: slideIn 0.5s ease-out forwards;
+
+            white-space: nowrap;
+            width:max-content;
         }
 
-        .menu-item:hover {
-            transform: skew(-25deg) translateX(30px) scale(1.1);
+        /* The Base White Text */
+        .menu-item span {
+            grid-area: 1 / 1; /* Both spans occupy the same grid cell */
+            color: white;
+            z-index: 1;
         }
 
-        /* Shard Effect */
-        .menu-item::after {
+        /* THE PINK ECHO (Bottom Layer) */
+        .menu-item::before {
             content: '';
             position: absolute;
-            top: 0; left: 0;
-            width: 120%; height: 100%;
-            background: var(--shard-color);
-            clip-path: polygon(0% 0%, 15% 45%, 45% 0%, 100% 50%, 70% 100%, 0% 100%);
-            mix-blend-mode: screen;
+            inset: -10% -15%; 
+            background-color: var(--shard-color);
+            clip-path: polygon(0% 50%, 85% 15%, 100% 50%, 85% 85%);
             opacity: 0;
-            transition: 0.15s;
+            z-index: 0; 
+            transition: all 0.15s ease-out;
+            transform: translateX(-30px);
         }
 
-        .menu-item:hover::after { opacity: 1; }
+        /* THE WHITE SHARD + BLACK TEXT (Top Layer) */
+        .menu-item .shard-reveal {
+            grid-area: 1 / 1;
+            color: black;
+            background-color: white;
+            width: 120%; /* Shard size */
+            height: 130%;
+            position: absolute;
+            left: -15%;
+            
+            display: flex;
+            align-items: center;
+            padding-left: 15%; /* Re-aligns the black text with white text */
+            box-sizing: border-box;
+
+            clip-path: polygon(0% 50%, 85% 15%, 100% 50%, 85% 85%);
+            
+            opacity: 0;
+            z-index: 2; 
+            transform: translateX(-15px);
+            transition: all 0.15s ease-out;
+            pointer-events: none;
+        }
+
+        /* HOVER INTERACTIONS */
+        .menu-item:hover {
+            transform: skew(-25deg) translateX(40px) scale(1.05);
+        }
+
+        .menu-item:hover::before {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-item:hover .shard-reveal {
+            opacity: 1;
+            transform: translateX(0);
+        }
 
         @keyframes slideIn {
             to { opacity: 1; transform: skew(-25deg) translateX(0); }
@@ -107,54 +143,182 @@
             top: 50px; left: 50px;
             background: white;
             color: black;
-            padding: 10px 30px;
+            padding: 10px 35px;
             transform: skew(-15deg);
             z-index: 10;
+        }
+
+        /* CSS for sub menus */
+        .page-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.4s;
+            z-index: 10;
+        }
+
+        .hidden-layer {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-50px) skew(5deg); /* Slides out to the left */
+        }
+
+        /* Add a blur effect to the video when a sub-menu is open */
+        body.sub-menu-open .video-container {
+            filter: blur(10px) brightness(0.5);
+            transition: 0.5s;
+        }
+
+
+        /* CSS for paragraphed text inside sub menus with a scroll bar */
+    
+        /* Container for your actual bio/work info */
+        .content-box {
+            margin-top: 30px;
+            padding: 20px;
+            max-width: 600px;
+            max-height: 400px; /* Limits height to trigger scrolling */
+            overflow-y: auto;  /* Enables vertical scroll if text is too long */
+            
+            /* Allow text to wrap normally again */
+            white-space: normal; 
+            
+            font-family: var(--p3r-font);
+            color: white;
+            background: rgba(0, 0, 0, 0.4); /* Subtle backing to help readability */
+            border-left: 5px solid var(--p3r-light-blue);
+            
+            /* Optional: Slant the whole box to match the UI */
+            transform: skew(5deg); 
+        }
+
+        /* Reverse the slant for the text inside so it's readable */
+        .content-box p, .content-box h1 {
+            transform: skew(-5deg);
+        }
+
+        /* Custom P3R Scrollbar */
+        .content-box::-webkit-scrollbar {
+            width: 8px;
+        }
+        .content-box::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .content-box::-webkit-scrollbar-thumb {
+            background: var(--p3r-light-blue);
         }
     </style>
 </head>
 <body>
-
     <div class="video-container">
         <video id="menu-loop" class="video-bg" muted autoplay loop playsinline>
             <source src="main.mp4" type="video/mp4">
         </video>
-
         <video id="menu-intro" class="video-bg" muted autoplay playsinline>
             <source src="splash.mp4" type="video/mp4">
         </video>
     </div>
 
-    <div class="wallet-ui">
-        <div style="font-size: 2rem;">¥ Gabriel Berres</div>
-        <div style="font-size: 0.8rem; color: #555;">Programmer Analyst</div>
+    <div id="main-menu" class="page-layer">
+        <div class="wallet-ui">
+            <div style="font-size: 1.8rem; font-weight: 900; font-family: 'Montserrat', sans-serif;">¥ GABRIEL BERRES</div>
+            <div style="font-size: 0.8rem; color: #555; font-weight: bold; text-transform: uppercase;">Programmer Analyst</div>
+        </div>
+
+        <div class="menu-wrapper">
+            <div class="menu-item" onclick="showPage('about-page')">
+                <span>About Me</span>
+                <div class="shard-reveal">About Me</div>
+            </div>
+            
+            <div class="menu-item" onclick="showPage('work-page')">
+                <span>Work Exp</span>
+                <div class="shard-reveal">Work Exp</div>
+            </div>
+            
+            <a href="https://github.com/bearcat1109" target="_blank" style="text-decoration: none;">
+                <div class="menu-item">
+                    <span>Github Link</span>
+                    <div class="shard-reveal">Github Link</div>
+                </div>
+            </a>
+            
+            <div class="menu-item">
+                <span>Contact Info</span>
+                <div class="shard-reveal">Contact Info</div>
+            </div>
+        </div>
     </div>
 
-    <div class="menu-wrapper">
-        <div class="menu-item" style="animation-delay: 0.1s;">About Me</div>
-        <div class="menu-item" style="animation-delay: 0.2s;">Work Experience</div>
-        <a href="https://github.com/bearcat1109" target="_blank" style="text-decoration: none;">
-            <div class="menu-item" style="animation-delay: 0.1s;">Github Link</div>
-        </a>
-        <div class="menu-item" style="animation-delay: 0.4s;">Contact Info</div>
-        <!-- <div class="menu-item" style="animation-delay: 0.5s;">Quest</div>
-        <div class="menu-item" style="animation-delay: 0.6s;">Social Link</div> -->
+    <div id="about-page" class="page-layer hidden-layer">
+        <div class="menu-wrapper">
+            <div class="menu-item" onclick="showPage('main-menu')">
+                <span>< BACK</span>
+                <div class="shard-reveal">< BACK</div>
+            </div>
+            <div style="color: white; font-family: var(--p3r-font); font-style: italic; margin-top: 20px;">
+                <h1 style="font-size: 4rem;">ABOUT ME</h1>
+                <p style="font-size: 1.5rem; max-width: 600px;">Hello! My name is Gabriel Berres. I'm a Programmer Analyst working out of Tahlequah, Oklahoma. I primarily work with SQL database work and automation using languages like Python.</p>
+            </div>
+        </div>
     </div>
+
+    <div id="work-page" class="page-layer hidden-layer">
+        <div class="menu-wrapper">
+            <div class="menu-item" onclick="showPage('main-menu')">
+                <span>< BACK</span>
+                <div class="shard-reveal">< BACK</div>
+            </div>
+            <!-- <div style="color: white; font-family: var(--p3r-font); font-style: italic; margin-top: 20px;">
+                <h1 style="font-size: 4rem;">WORK EXPERIENCE</h1>
+                <p style="font-size: 1.5rem; max-width: 600px;">Programmer Analyst - 5/2023-Present. /n Write SQL database queries/procedures as well as Argos datablocks [visualisation]</p>
+            </div> -->
+            <div class="content-box">
+                    <h1 style="font-style: italic; color: var(--p3r-light-blue);">HISTORY</h1>
+                        <p>
+                            Programmer Analyst: 5/2023-Present<br><br>
+                            - Write SQL database queries/procedures as well as Argos datablocks [visualisation] <br>
+                            - Work with software like Automic/UC4[job scheduler] and Python for workplace automation <br>
+                            - Implement new software products for the institution. Previous work on Watermark: Student Learning and Licensure and Planning & Self-Study (Coursework software), StarRez (Higher Ed Housing software), ReUp (Re-recruitment), Watermark: System Admin (Streamlined API for SLL and PSS), SoftDocs (Document management software) implementations. <br>
+                            - Ticketing via TeamDynamix
+                        
+                        
+                        </p>
+                        <p>
+                            
+                        </p>
+            </div>
+        </div>
+    </div>
+
+    </body>
 
     <script>
-        const intro = document.getElementById('menu-intro');
-        
-        // Final fallback: If the video DOES load, this will fire.
-        intro.onplay = () => console.log("Splash is playing!");
-        
-        intro.onended = () => {
-            intro.classList.add('hidden');
-            console.log("Intro ended, switching to loop.");
-        };
+    const intro = document.getElementById('menu-intro');
+    
+    // Video Intro Logic
+    intro.onended = () => { 
+        intro.classList.add('hidden'); 
+    };
 
-        // Troubleshooting: Log if the files are even found
-        intro.onerror = () => console.error("Could not find splash.mp4");
-        document.getElementById('menu-loop').onerror = () => console.error("Could not find main.mp4");
+    // Navigation Function
+    function showPage(pageId) {
+        // 1. Hide all page layers
+        const layers = document.querySelectorAll('.page-layer');
+        layers.forEach(layer => {
+            layer.classList.add('hidden-layer');
+        });
+
+        // 2. Show the one we want
+        const target = document.getElementById(pageId);
+        target.classList.remove('hidden-layer');
+
+        // 3. Optional: Blur background video if we aren't on the main menu
+        if (pageId === 'main-menu') {
+            document.body.classList.remove('sub-menu-open');
+        } else {
+            document.body.classList.add('sub-menu-open');
+        }
+    }
     </script>
-</body>
 </html>
