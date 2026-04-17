@@ -170,42 +170,44 @@
         }
 
 
-        /* CSS for paragraphed text inside sub menus with a scroll bar */
-    
-        /* Container for your actual bio/work info */
-        .content-box {
-            margin-top: 30px;
+        /* This is the container that holds all your job boxes */
+        .job-list-container {
+            margin-top: 20px;
+            max-height: 70vh; /* Limits height so it doesn't run off screen */
+            overflow-y: auto;
+            padding-right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Space between each job box */
+        }
+
+        /* Updated individual job box */
+        .job-card {
             padding: 20px;
-            max-width: 600px;
-            max-height: 400px; /* Limits height to trigger scrolling */
-            overflow-y: auto;  /* Enables vertical scroll if text is too long */
-            
-            /* Allow text to wrap normally again */
             white-space: normal; 
-            
             font-family: var(--p3r-font);
             color: white;
-            background: rgba(0, 0, 0, 0.4); /* Subtle backing to help readability */
+            background: rgba(0, 0, 0, 0.6);
             border-left: 5px solid var(--p3r-light-blue);
-            
-            /* Optional: Slant the whole box to match the UI */
-            transform: skew(5deg); 
+            transform: skew(5deg);
+            transition: transform 0.2s, background 0.2s;
         }
 
-        /* Reverse the slant for the text inside so it's readable */
-        .content-box p, .content-box h1 {
-            transform: skew(-5deg);
+        /* Small hover effect to make it feel like a P3R menu */
+        .job-card:hover {
+            background: rgba(0, 210, 255, 0.2);
+            transform: skew(5deg) translateX(10px);
         }
 
-        /* Custom P3R Scrollbar */
-        .content-box::-webkit-scrollbar {
-            width: 8px;
+        .job-card h2, .job-card p {
+            transform: skew(-5deg); /* Un-skew text */
+            margin: 5px 0;
         }
-        .content-box::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .content-box::-webkit-scrollbar-thumb {
-            background: var(--p3r-light-blue);
+
+        .job-date {
+            font-size: 0.9rem;
+            color: var(--p3r-light-blue);
+            font-weight: bold;
         }
     </style>
 </head>
@@ -232,8 +234,8 @@
             </div>
             
             <div class="menu-item" onclick="showPage('work-page')">
-                <span>Work Exp</span>
-                <div class="shard-reveal">Work Exp</div>
+                <span>Work Exp.</span>
+                <div class="shard-reveal">Work Exp.</div>
             </div>
             
             <a href="https://github.com/bearcat1109" target="_blank" style="text-decoration: none;">
@@ -242,8 +244,20 @@
                     <div class="shard-reveal">Github Link</div>
                 </div>
             </a>
+
+            <a href="https://www.youtube.com/watch?v=ZpYMtYp4oss" target="_blank" style="text-decoration: none;">
+                <div class="menu-item">
+                    <span>Capstone</span>
+                    <div class="shard-reveal">Capstone</div>
+                </div>
+            </a>
             
-            <div class="menu-item">
+            <div class="menu-item" onClick="showPage('languages-page')">
+                <span>Languages</span>
+                <div class="shard-reveal">Languages</div>
+            </div>
+
+            <div class="menu-item" onClick="showPage('contacts-page')">
                 <span>Contact Info</span>
                 <div class="shard-reveal">Contact Info</div>
             </div>
@@ -258,7 +272,7 @@
             </div>
             <div style="color: white; font-family: var(--p3r-font); font-style: italic; margin-top: 20px;">
                 <h1 style="font-size: 4rem;">ABOUT ME</h1>
-                <p style="font-size: 1.5rem; max-width: 600px;">Hello! My name is Gabriel Berres. I'm a Programmer Analyst working out of Tahlequah, Oklahoma. I primarily work with SQL database work and automation using languages like Python.</p>
+                <p style="font-size: 1.5rem; max-width: 600px;">Hello! My name is Gabriel Berres. I'm a Programmer Analyst working out of Tahlequah, Oklahoma. I primarily work with SQL database work and automation using languages like Python. I hold a Bachelor's in Computer Science from Northeastern State University [Dec 2025] with a double minor in American Sign Language Studies and Cherokee.</p>
             </div>
         </div>
     </div>
@@ -269,27 +283,92 @@
                 <span>< BACK</span>
                 <div class="shard-reveal">< BACK</div>
             </div>
-            <!-- <div style="color: white; font-family: var(--p3r-font); font-style: italic; margin-top: 20px;">
-                <h1 style="font-size: 4rem;">WORK EXPERIENCE</h1>
-                <p style="font-size: 1.5rem; max-width: 600px;">Programmer Analyst - 5/2023-Present. /n Write SQL database queries/procedures as well as Argos datablocks [visualisation]</p>
-            </div> -->
-            <div class="content-box">
-                    <h1 style="font-style: italic; color: var(--p3r-light-blue);">HISTORY</h1>
-                        <p>
-                            Programmer Analyst: 5/2023-Present<br><br>
-                            - Write SQL database queries/procedures as well as Argos datablocks [visualisation] <br>
-                            - Work with software like Automic/UC4[job scheduler] and Python for workplace automation <br>
-                            - Implement new software products for the institution. Previous work on Watermark: Student Learning and Licensure and Planning & Self-Study (Coursework software), StarRez (Higher Ed Housing software), ReUp (Re-recruitment), Watermark: System Admin (Streamlined API for SLL and PSS), SoftDocs (Document management software) implementations. <br>
-                            - Ticketing via TeamDynamix
-                        
-                        
-                        </p>
-                        <p>
-                            
-                        </p>
+            <div class="job-list-container">
+                <div class="job-card">
+                    <div class="job-date">5/2023-Present</div>
+                    <h2>Programmer Analyst @ Northeastern State University</h2>
+                    <p>
+                        - Write SQL database queries/procedures as well as Argos datablocks [visualisation] <br>
+                        - Work with software like Automic/UC4 [job scheduler] and Python for workplace automation <br>
+                        - Implement new software products for the institution. Previous work on Watermark: Student Learning and Licensure and Planning & Self-Study (Coursework software), StarRez (Higher Ed Housing software), ReUp (Re-recruitment), Watermark: System Admin (Streamlined API for SLL and PSS), SoftDocs (Document management software) implementations. <br>
+                        - Ticketing via TeamDynamix <br>
+                        - I started development for and maintain with our intern an HTML documentation project of our Banner [ERP] instance containing table information and a query library to improve Programmer workflow. <a href="https://atendev.github.io/nsu-prod-docs/" target="_blank" class="p3r-link">LINK</a>
+                    </p>
+                </div>
+
+                <div class="job-card">
+                    <div class="job-date">9/2021-5/2023</div>
+                    <h2>Student Technical Consultant Level 3 (Helpdesk) @ Northeastern State University</h2>
+                    <p>
+                        Network Access Crew Responsibilities: <br>
+                        - Troubleshoot and provide support for campus-wide network equipment including access points, workstations, etc <br>
+                        - Provide over-the-phone support for NSU sites/software, including Blackboard, goNSU <br>
+                        <br>
+                        Level 3 Responsibilities: <br>
+                        -	Develop training materials for Level 1 and 2 STCs <br>
+                        -	Delegate tasks to Level 1 and 2 STCs <br>
+                        -	Administer office policy and conduct disciplinary or advisory meetings when necessary <br>
+                        -	Work with Service Desk Manager and other Level 3s to make office-related decisions <br>
+                        -	Be first point of contact for incoming NSU TeamDynamix tickets <br>
+                    </p>
+                </div>
+            </div></div>
+
             </div>
         </div>
     </div>
+
+    <div id="languages-page" class="page-layer hidden-layer">
+        <div class="menu-wrapper">
+            <div class="menu-item" onclick="showPage('main-menu')">
+                <span>< BACK</span>
+                <div class="shard-reveal">< BACK</div>
+            </div>
+            <div class="job-list-container">
+                <div class="job-card">
+                    <div class="job-date">Conversational</div>
+                    <h2>American Sign Language</h2>
+                    <p>
+                        - I have a completed Minor in ASL Studies and am conversational (I am hard of hearing!). I Sign with my wife daily. <br>
+                    </p>
+                </div>
+
+                <div class="job-card">
+                    <div class="job-date">Beginner</div>
+                    <h2>Cherokee</h2>
+                    <p>
+                        - I have completed a Minor in Cherokee, and am a Cherokee citizen. I would consider myself a beginner. <br>
+                    </p>
+                </div>
+
+                <div class="job-card">
+                    <div class="job-date">Beginner</div>
+                    <h2>Japanese</h2>
+                    <p>
+                        - I have no classroom experience in Japanese but have been learning on the side for fun for about 5 years. <br>
+                    </p>
+                </div>
+            </div></div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="contacts-page" class="page-layer hidden-layer">
+        <div class="menu-wrapper">
+            <div class="menu-item" onclick="showPage('main-menu')">
+                <span>< BACK</span>
+                <div class="shard-reveal">< BACK</div>
+            </div>
+            <div style="color: white; font-family: var(--p3r-font); font-style: italic; margin-top: 20px;">
+                <h1 style="font-size: 4rem;">CONTACT INFO</h1>
+                <p style="font-size: 1.5rem; max-width: 600px;">CELL: 918-360-4253 <br> WORK:918-444-5819 <br> EMAIL: berresg@nsuok.edu / gabrielberres9@gmail.com</p>
+            </div>
+        </div>
+    </div>
+
+
+
 
     </body>
 
