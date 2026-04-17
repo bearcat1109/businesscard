@@ -1,0 +1,1 @@
+This is the repository for my bio/ business card page. The page is linked on this project in Github pages.
